@@ -1,0 +1,19 @@
+{
+  "name": "DashStyle",
+  "description": "A fully configurable dashboard for Home Assistant.",
+  "tasks": [
+    "Create a new custom component for HACS.",
+    "The component should be a fully configurable dashboard.",
+    "The dashboard will have a main view and an admin view.",
+    "The dashboard should not rely on any existing cards.",
+    "The basis for the dashboard view is the `dashboard` folder and `config/UI_Lovelace.yaml`.",
+    "Create the config flow.",
+    "Create the dashboard registration.",
+    "Create all required cards from the `dashboard` folder.",
+    "Create the main dashboard view.",
+    "Create a configurable admin view.",
+    "The admin view should allow for the definition of rooms and entities.",
+    "The admin section should have configuration capabilities for CSS.",
+    "Create a README.md and a copilot.json file."
+  ]
+}
