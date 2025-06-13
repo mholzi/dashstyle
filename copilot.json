@@ -1,19 +1,20 @@
 {
   "name": "DashStyle",
-  "description": "A fully configurable dashboard for Home Assistant.",
+  "description": "A fully configurable dashboard for Home Assistant, built with zero frontend dependencies.",
+  "version": "1.0.0",
+  "author": "mholzi",
+  "iot_class": "local_polling",
   "tasks": [
     "Create a new custom component for HACS.",
     "The component should be a fully configurable dashboard.",
-    "The dashboard will have a main view and an admin view.",
-    "The dashboard should not rely on any existing cards.",
-    "The basis for the dashboard view is the `dashboard` folder and `config/UI_Lovelace.yaml`.",
-    "Create the config flow.",
-    "Create the dashboard registration.",
-    "Create all required cards from the `dashboard` folder.",
-    "Create the main dashboard view.",
-    "Create a configurable admin view.",
-    "The admin view should allow for the definition of rooms and entities.",
-    "The admin section should have configuration capabilities for CSS.",
-    "Create a README.md and a copilot.json file."
+    "The dashboard will have a main view and an admin view, toggled by a button for admin users.",
+    "The dashboard must not rely on any existing custom cards (e.g., custom:button-card).",
+    "Create a config flow for easy setup from the UI.",
+    "Implement websocket services for saving and loading the dashboard configuration to/from the HA `config/.storage` directory.",
+    "The main view will dynamically render rooms and entity cards based on the saved configuration.",
+    "Cards will be interactive, calling appropriate services on click (e.g., light.toggle).",
+    "The admin view will allow for defining rooms, icons, and assigning entities.",
+    "The admin section will have configuration capabilities for basic CSS theming (colors, fonts).",
+    "Create a professional README.md and a complete copilot.json file."
   ]
 }
