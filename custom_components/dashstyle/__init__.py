@@ -1,9 +1,11 @@
 """The DashStyle integration."""
 import logging
+import voluptuous as vol
+
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.typing import ConfigType
-from homeassistant.helpers import storage
-from homeassistant.helpers import websocket_api
+from homeassistant.helpers.storage import Store
+from homeassistant.components import websocket_api
 
 from .const import DOMAIN
 
@@ -22,7 +24,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigType) -> bool:
     """Set up DashStyle from a config entry."""
 
     # The store is used to save and load the configuration.
-    store = storage.Store(hass, STORAGE_VERSION, STORAGE_KEY)
+    store = Store(hass, STORAGE_VERSION, STORAGE_KEY)
     
     # Load the saved configuration from the store, or return a default dict.
     saved_config = await store.async_load() or {"rooms": [], "styles": {}}
@@ -52,8 +54,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigType) -> bool:
         hass,
         "dashstyle/config/load",
         websocket_api.async_ws_handler(websocket_load_config),
-        websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend({
+        vol.Schema({
             "type": "dashstyle/config/load",
+            vol.Required("id"): int,
         }),
     )
 
@@ -61,9 +64,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigType) -> bool:
         hass,
         "dashstyle/config/save",
         websocket_api.async_ws_handler(websocket_save_config),
-        websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend({
+        vol.Schema({
             "type": "dashstyle/config/save",
-            "config": dict,
+            vol.Required("id"): int,
+            vol.Required("config"): dict,
         }),
     )
 
@@ -72,6 +76,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigType) -> bool:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigType) -> bool:
     """Unload a config entry."""
-    hass.data[DOMAIN].pop(entry.entry_id)
-    # The websocket commands are automatically unregistered
+    # The websocket commands are automatically unregistered by Home Assistant
+    hass.data[DOMAIN].pop(entry.entry_id, None)
     return True
+
