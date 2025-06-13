@@ -5,7 +5,7 @@ import voluptuous as vol
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.helpers.storage import Store
-from homeassistant.components import websocket_api
+from homeassistant.components import websocket_api, frontend
 from homeassistant.config_entries import ConfigEntry
 
 from .const import DOMAIN
@@ -45,7 +45,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         await store.async_save(saved_config)
         connection.send_result(msg["id"], {"success": True})
 
-    # Register the websocket handlers.
     websocket_api.async_register_command(
         hass,
         f"{DOMAIN}/config/load",
@@ -67,28 +66,30 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         }),
     )
 
-    # This part registers the panel with Home Assistant.
-    # It seems it was missing from the previous steps.
-    # We will use the name from the config entry to create the dashboard.
-    dashboard_url = entry.data.get("name", "dashstyle").lower().replace(" ", "_")
-    
-    await hass.components.lovelace.async_register_panel(
-        url_path=dashboard_url,
-        frontend_url_path=f"/{DOMAIN}/panel.js",
+    # --- NEW METHOD FOR PANEL REGISTRATION ---
+    # This is the modern way to register a custom panel.
+    frontend.async_register_built_in_panel(
+        hass,
+        component_name="custom",
+        sidebar_title=entry.data.get("name", "DashStyle"),
+        sidebar_icon="mdi:view-dashboard",
+        frontend_url_path=entry.data.get("name", "dashstyle").lower().replace(" ", "_"),
         config={
-            "mode": "js",
-            "title": entry.data.get("name", "DashStyle"),
-            "icon": "mdi:view-dashboard",
-            "show_in_sidebar": True,
-            "require_admin": False,
+            "_panel_custom": {
+                "name": "dashstyle-panel",
+                "embed_iframe": True,
+                "trust_external_script": True,
+                "js_url": "/dashstyle_assets/dashstyle.js"
+            }
         },
+        require_admin=False,
     )
-
-    # Register the frontend javascript file so it can be served.
+    
+    # Register the static path for the javascript file
     hass.http.register_static_path(
-        f"/{DOMAIN}/panel.js",
-        hass.config.path(f"custom_components/{DOMAIN}/www/dashstyle.js"),
-        cache_headers=False,
+        "/dashstyle_assets",
+        hass.config.path(f"custom_components/{DOMAIN}/www"),
+        cache_headers=False
     )
 
 
@@ -98,10 +99,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     # Unregister the panel
-    dashboard_url = entry.data.get("name", "dashstyle").lower().replace(" ", "_")
-    hass.components.lovelace.async_unregister_panel(dashboard_url)
-    
-    # Unregister websocket handlers (this is now handled automatically by HA)
+    frontend.async_remove_panel(hass, entry.data.get("name", "dashstyle").lower().replace(" ", "_"))
     
     # Clean up data
     hass.data[DOMAIN].pop(entry.entry_id, None)
