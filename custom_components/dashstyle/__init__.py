@@ -23,11 +23,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up DashStyle from a config entry."""
-
-    # The store is used to save and load the configuration.
     store = Store(hass, STORAGE_VERSION, STORAGE_KEY)
-    
-    # Load the saved configuration from the store, or return a default dict.
     saved_config = await store.async_load() or {"rooms": [], "styles": {}}
 
     async def websocket_load_config(
@@ -45,39 +41,69 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     ) -> None:
         """Handle the websocket command to save the config."""
         nonlocal saved_config
-        # We update the global saved_config object and then save it to the store.
         saved_config = msg["config"]
         await store.async_save(saved_config)
         connection.send_result(msg["id"], {"success": True})
 
     # Register the websocket handlers.
-    # The async_ws_handler wrapper is removed as it's deprecated.
     websocket_api.async_register_command(
         hass,
-        "dashstyle/config/load",
+        f"{DOMAIN}/config/load",
         websocket_load_config,
         vol.Schema({
-            "type": vol.All(str, "dashstyle/config/load"),
+            "type": vol.All(str, f"{DOMAIN}/config/load"),
             vol.Required("id"): int,
         }),
     )
 
     websocket_api.async_register_command(
         hass,
-        "dashstyle/config/save",
+        f"{DOMAIN}/config/save",
         websocket_save_config,
         vol.Schema({
-            "type": vol.All(str, "dashstyle/config/save"),
+            "type": vol.All(str, f"{DOMAIN}/config/save"),
             vol.Required("id"): int,
             vol.Required("config"): dict,
         }),
     )
+
+    # This part registers the panel with Home Assistant.
+    # It seems it was missing from the previous steps.
+    # We will use the name from the config entry to create the dashboard.
+    dashboard_url = entry.data.get("name", "dashstyle").lower().replace(" ", "_")
+    
+    await hass.components.lovelace.async_register_panel(
+        url_path=dashboard_url,
+        frontend_url_path=f"/{DOMAIN}/panel.js",
+        config={
+            "mode": "js",
+            "title": entry.data.get("name", "DashStyle"),
+            "icon": "mdi:view-dashboard",
+            "show_in_sidebar": True,
+            "require_admin": False,
+        },
+    )
+
+    # Register the frontend javascript file so it can be served.
+    hass.http.register_static_path(
+        f"/{DOMAIN}/panel.js",
+        hass.config.path(f"custom_components/{DOMAIN}/www/dashstyle.js"),
+        cache_headers=False,
+    )
+
 
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
-    # The websocket commands are automatically unregistered by Home Assistant
+    # Unregister the panel
+    dashboard_url = entry.data.get("name", "dashstyle").lower().replace(" ", "_")
+    hass.components.lovelace.async_unregister_panel(dashboard_url)
+    
+    # Unregister websocket handlers (this is now handled automatically by HA)
+    
+    # Clean up data
     hass.data[DOMAIN].pop(entry.entry_id, None)
+    
     return True
