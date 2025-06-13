@@ -1,20 +1,77 @@
 """The DashStyle integration."""
-from homeassistant.core import HomeAssistant
+import logging
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.typing import ConfigType
+from homeassistant.helpers import storage
+from homeassistant.helpers import websocket_api
+
 from .const import DOMAIN
-from .dashboard import async_register_dashboard
+
+_LOGGER = logging.getLogger(__name__)
+STORAGE_VERSION = 1
+STORAGE_KEY = f"{DOMAIN}.config"
+
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up the DashStyle component."""
     hass.data.setdefault(DOMAIN, {})
     return True
 
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigType) -> bool:
     """Set up DashStyle from a config entry."""
-    await async_register_dashboard(hass, entry.data["name"])
+
+    # The store is used to save and load the configuration.
+    store = storage.Store(hass, STORAGE_VERSION, STORAGE_KEY)
+    
+    # Load the saved configuration from the store, or return a default dict.
+    saved_config = await store.async_load() or {"rooms": [], "styles": {}}
+
+    async def websocket_load_config(
+        hass: HomeAssistant,
+        connection: websocket_api.ActiveConnection,
+        msg: dict,
+    ) -> None:
+        """Handle the websocket command to load the config."""
+        connection.send_result(msg["id"], saved_config)
+
+    async def websocket_save_config(
+        hass: HomeAssistant,
+        connection: websocket_api.ActiveConnection,
+        msg: dict,
+    ) -> None:
+        """Handle the websocket command to save the config."""
+        nonlocal saved_config
+        # We update the global saved_config object and then save it to the store.
+        saved_config = msg["config"]
+        await store.async_save(saved_config)
+        connection.send_result(msg["id"], {"success": True})
+
+    # Register the websocket handlers
+    websocket_api.async_register_command(
+        hass,
+        "dashstyle/config/load",
+        websocket_api.async_ws_handler(websocket_load_config),
+        websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend({
+            "type": "dashstyle/config/load",
+        }),
+    )
+
+    websocket_api.async_register_command(
+        hass,
+        "dashstyle/config/save",
+        websocket_api.async_ws_handler(websocket_save_config),
+        websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend({
+            "type": "dashstyle/config/save",
+            "config": dict,
+        }),
+    )
+
     return True
+
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigType) -> bool:
     """Unload a config entry."""
     hass.data[DOMAIN].pop(entry.entry_id)
+    # The websocket commands are automatically unregistered
     return True
