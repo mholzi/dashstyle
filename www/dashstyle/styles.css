@@ -1,4 +1,16 @@
-/* Add your CSS here */
-h1 {
-    color: var(--primary-text-color);
+/*
+  DashStyle Custom Stylesheet
+
+  While most of the core component styles are defined directly within dashstyle.js
+  to ensure they are correctly encapsulated in the Shadow DOM, this file can be
+  used for loading custom fonts, defining broad CSS variables, or for styles
+  that you might want to link externally.
+
+  For the current version, this file is not strictly required for the dashboard
+  to function, but it is included to provide a clean structure for future enhancements.
+*/
+
+.placeholder-style {
+  /* This is an example of a style you could define here. */
+  font-family: 'Roboto', sans-serif;
 }
