@@ -2,10 +2,11 @@
 import logging
 import voluptuous as vol
 
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.helpers.storage import Store
 from homeassistant.components import websocket_api
+from homeassistant.config_entries import ConfigEntry
 
 from .const import DOMAIN
 
@@ -20,7 +21,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     return True
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigType) -> bool:
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up DashStyle from a config entry."""
 
     # The store is used to save and load the configuration.
@@ -49,13 +50,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigType) -> bool:
         await store.async_save(saved_config)
         connection.send_result(msg["id"], {"success": True})
 
-    # Register the websocket handlers
+    # Register the websocket handlers.
+    # The async_ws_handler wrapper is removed as it's deprecated.
     websocket_api.async_register_command(
         hass,
         "dashstyle/config/load",
-        websocket_api.async_ws_handler(websocket_load_config),
+        websocket_load_config,
         vol.Schema({
-            "type": "dashstyle/config/load",
+            "type": vol.All(str, "dashstyle/config/load"),
             vol.Required("id"): int,
         }),
     )
@@ -63,9 +65,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigType) -> bool:
     websocket_api.async_register_command(
         hass,
         "dashstyle/config/save",
-        websocket_api.async_ws_handler(websocket_save_config),
+        websocket_save_config,
         vol.Schema({
-            "type": "dashstyle/config/save",
+            "type": vol.All(str, "dashstyle/config/save"),
             vol.Required("id"): int,
             vol.Required("config"): dict,
         }),
@@ -74,9 +76,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigType) -> bool:
     return True
 
 
-async def async_unload_entry(hass: HomeAssistant, entry: ConfigType) -> bool:
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     # The websocket commands are automatically unregistered by Home Assistant
     hass.data[DOMAIN].pop(entry.entry_id, None)
     return True
-
