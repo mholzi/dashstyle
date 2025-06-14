@@ -76,7 +76,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         frontend_url_path=entry.data.get("name", "dashstyle").lower().replace(" ", "_"),
         config={
             "_panel_custom": {
-                "name": "dashstyle-panel",
+                "name": "dash-style",
                 "html_url": "/dashstyle_assets/panel.html"
             }
         },
