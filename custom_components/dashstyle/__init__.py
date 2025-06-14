@@ -66,8 +66,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         }),
     )
 
-    # --- NEW METHOD FOR PANEL REGISTRATION ---
-    # This is the modern way to register a custom panel.
+    # --- PANEL REGISTRATION ---
+    # Register the dashboard panel in Home Assistant's sidebar
     frontend.async_register_built_in_panel(
         hass,
         component_name="custom",
@@ -77,9 +77,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         config={
             "_panel_custom": {
                 "name": "dashstyle-panel",
-                "embed_iframe": True,
-                "trust_external_script": True,
-                "js_url": "/dashstyle_assets/dashstyle.js"
+                "html_url": "/dashstyle_assets/panel.html"
             }
         },
         require_admin=False,
@@ -88,7 +86,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Register the static path for the javascript file
     hass.http.register_static_path(
         "/dashstyle_assets",
-        hass.config.path(f"custom_components/{DOMAIN}/www"),
+        hass.config.path("www/dashstyle"),
         cache_headers=False
     )
 
