@@ -6,6 +6,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.helpers.storage import Store
 from homeassistant.components import websocket_api, frontend
+from homeassistant.components.http import StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
 
 from .const import DOMAIN
@@ -84,11 +85,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     )
     
     # Register the static path for the javascript file
-    hass.http.register_static_path(
-        "/dashstyle_assets",
-        hass.config.path("www/dashstyle"),
-        cache_headers=False
-    )
+    await hass.http.async_register_static_paths([
+        StaticPathConfig(
+            "/dashstyle_assets", hass.config.path("www/dashstyle"), cache_headers=False
+        )
+    ])
 
 
     return True
