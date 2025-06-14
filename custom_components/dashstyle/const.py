@@ -1,5 +1,3 @@
-"""Constants for the DashStyle integration."""
+"""Constants for the My Custom Dashboard integration."""
 
-# The domain of the integration. This must be unique.
-DOMAIN = "dashstyle"
-
+DOMAIN = "my_dashboard"
