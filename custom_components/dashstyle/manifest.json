@@ -4,7 +4,7 @@
   "documentation": "https://github.com/mholzi/dashstyle/blob/main/README.md",
   "issue_tracker": "https://github.com/mholzi/dashstyle/issues",
   "codeowners": ["@mholzi"],
-  "version": "1.0.0",
+  "version": "0.1.0-Beta-1",
   "iot_class": "local_push",
   "config_flow": true,
   "dependencies": [
