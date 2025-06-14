@@ -33,13 +33,16 @@ class DashStyle {
     // WebSocket and API methods
     async sendWebSocketCommand(type, data = {}) {
         return new Promise((resolve, reject) => {
-            if (!window.hassConnection) {
-                reject(new Error('Home Assistant connection not available'));
+            // Check if we're in Home Assistant environment
+            if (typeof window.hassConnection === 'undefined') {
+                // Fallback for development/standalone testing
+                console.warn('Home Assistant connection not available, using mock data');
+                this.handleMockCommand(type, data, resolve, reject);
                 return;
             }
 
             const message = {
-                id: Date.now(),
+                id: Math.floor(Math.random() * 1000000),
                 type: type,
                 entry_id: this.entryId,
                 ...data
@@ -49,32 +52,67 @@ class DashStyle {
                 reject(new Error('WebSocket command timeout'));
             }, 10000);
 
-            const handleMessage = (event) => {
-                const response = JSON.parse(event.data);
-                if (response.id === message.id) {
+            // Use Home Assistant's WebSocket connection
+            window.hassConnection.sendMessagePromise(message)
+                .then(result => {
                     clearTimeout(timeout);
-                    window.removeEventListener('message', handleMessage);
-                    
-                    if (response.success === false) {
-                        reject(new Error(response.error || 'Command failed'));
-                    } else {
-                        resolve(response.result || response);
-                    }
-                }
-            };
-
-            window.addEventListener('message', handleMessage);
-            
-            // For HA integration, we need to use the connection object
-            if (window.hassConnection && window.hassConnection.sendMessage) {
-                window.hassConnection.sendMessage(message);
-            } else {
-                // Fallback for direct WebSocket
-                const ws = new WebSocket(`ws://${window.location.host}/api/websocket`);
-                ws.onopen = () => ws.send(JSON.stringify(message));
-                ws.onmessage = handleMessage;
-            }
+                    resolve(result);
+                })
+                .catch(error => {
+                    clearTimeout(timeout);
+                    reject(error);
+                });
         });
+    }
+
+    handleMockCommand(type, data, resolve, reject) {
+        // Mock responses for development/testing
+        setTimeout(() => {
+            switch (type) {
+                case 'dashstyle/get_config':
+                    resolve(this.config || {
+                        rooms: [
+                            { id: 'living_room', name: 'Living Room', icon: 'mdi:sofa' },
+                            { id: 'kitchen', name: 'Kitchen', icon: 'mdi:stove' }
+                        ],
+                        entities: {
+                            'living_room': [
+                                { entity_id: 'light.living_room', type: 'light' },
+                                { entity_id: 'sensor.temperature', type: 'sensor' }
+                            ],
+                            'kitchen': [
+                                { entity_id: 'light.kitchen', type: 'light' }
+                            ]
+                        },
+                        styles: {
+                            primary_color: '#03a9f4',
+                            accent_color: '#ff9800',
+                            background_color: '#f0f2f5',
+                            card_background: '#ffffff',
+                            text_color: '#333333',
+                            font_family: 'Arial, sans-serif'
+                        },
+                        layout: {
+                            columns: 3,
+                            card_gap: '16px',
+                            room_title_size: '24px'
+                        }
+                    });
+                    break;
+                case 'dashstyle/save_config':
+                    resolve({ success: true });
+                    break;
+                case 'dashstyle/get_entities':
+                    resolve([
+                        { entity_id: 'light.living_room', friendly_name: 'Living Room Light', domain: 'light', state: 'off', attributes: {} },
+                        { entity_id: 'light.kitchen', friendly_name: 'Kitchen Light', domain: 'light', state: 'on', attributes: {} },
+                        { entity_id: 'sensor.temperature', friendly_name: 'Temperature Sensor', domain: 'sensor', state: '22.5', attributes: { unit_of_measurement: '°C' } }
+                    ]);
+                    break;
+                default:
+                    reject(new Error(`Unknown command: ${type}`));
+            }
+        }, 100);
     }
 
     async loadConfig() {
