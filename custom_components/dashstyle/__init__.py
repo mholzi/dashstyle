@@ -8,7 +8,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.helpers.storage import Store
 from homeassistant.components import websocket_api, frontend
-from homeassistant.components.http import StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
 
 from .const import DOMAIN
@@ -107,18 +106,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         config={
             "_panel_custom": {
                 "name": "dash-style",
-                "html_url": "/dashstyle_assets/panel.html"
+                "html_url": "/local/dashstyle/panel.html"
             }
         },
         require_admin=False,
     )
-    
-    # --- STATIC PATH REGISTRATION ---
-    await hass.http.async_register_static_paths([
-        StaticPathConfig(
-            "/dashstyle_assets", dest_path, cache_headers=False
-        )
-    ])
 
     return True
 
