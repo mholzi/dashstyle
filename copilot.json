@@ -4,17 +4,136 @@
   "version": "1.0.0",
   "author": "mholzi",
   "iot_class": "local_polling",
-  "tasks": [
-    "Create a new custom component for HACS.",
-    "The component should be a fully configurable dashboard.",
-    "The dashboard will have a main view and an admin view, toggled by a button for admin users.",
-    "The dashboard must not rely on any existing custom cards (e.g., custom:button-card).",
-    "Create a config flow for easy setup from the UI.",
-    "Implement websocket services for saving and loading the dashboard configuration to/from the HA `config/.storage` directory.",
-    "The main view will dynamically render rooms and entity cards based on the saved configuration.",
-    "Cards will be interactive, calling appropriate services on click (e.g., light.toggle).",
-    "The admin view will allow for defining rooms, icons, and assigning entities.",
-    "The admin section will have configuration capabilities for basic CSS theming (colors, fonts).",
-    "Create a professional README.md and a complete copilot.json file."
+  "key_features": [
+    "Zero dependencies - pure JavaScript, HTML, and CSS",
+    "Live UI configuration through admin panel",
+    "Room-based entity organization",
+    "Entity type classification system",
+    "Real-time entity state updates",
+    "Comprehensive theming and styling options",
+    "Responsive design for all devices",
+    "WebSocket API for configuration management",
+    "Persistent storage in Home Assistant"
+  ],
+  "main_components": {
+    "backend": {
+      "file": "custom_components/dashstyle/__init__.py",
+      "description": "Main integration with WebSocket API, config storage, and HA integration",
+      "key_functions": [
+        "async_setup_entry - Initialize integration and register components",
+        "websocket_get_config - Retrieve dashboard configuration",
+        "websocket_save_config - Save configuration changes",
+        "websocket_get_entities - Get all available HA entities",
+        "DashStyleView - Serve main dashboard HTML",
+        "DashStyleStaticView - Serve CSS/JS static files"
+      ]
+    },
+    "config_flow": {
+      "file": "custom_components/dashstyle/config_flow.py",
+      "description": "Configuration flow for HACS integration setup",
+      "key_functions": [
+        "ConfigFlow.async_step_user - Handle user configuration input"
+      ]
+    },
+    "frontend": {
+      "html": "custom_components/dashstyle/www/dashstyle.html",
+      "css": "custom_components/dashstyle/www/dashstyle.css",
+      "js": "custom_components/dashstyle/www/dashstyle.js",
+      "description": "Complete frontend implementation with admin panel and dashboard views"
+    }
+  },
+  "admin_panel_features": {
+    "rooms_tab": [
+      "Add new rooms with custom names and icons",
+      "Edit existing room properties",
+      "Delete rooms and associated entities",
+      "Support for Material Design Icons (mdi:icon-name)"
+    ],
+    "entities_tab": [
+      "Assign entities to specific rooms",
+      "Classify entities with custom types (hoover, security, etc.)",
+      "Remove entities from rooms",
+      "Browse all available HA entities by domain"
+    ],
+    "styles_tab": [
+      "Configure primary and accent colors",
+      "Set background and card background colors",
+      "Adjust text color and font family",
+      "Real-time preview of style changes"
+    ],
+    "layout_tab": [
+      "Adjust grid columns (1-6)",
+      "Set card gap spacing",
+      "Configure room title size",
+      "Responsive layout adjustments"
+    ]
+  },
+  "supported_entities": {
+    "interactive": [
+      "light - Toggle on/off",
+      "switch - Toggle on/off", 
+      "fan - Toggle on/off",
+      "cover - Toggle open/close"
+    ],
+    "informational": [
+      "sensor - Display state and details",
+      "binary_sensor - Show on/off state",
+      "weather - Current conditions",
+      "camera - Entity details"
+    ]
+  },
+  "installation_requirements": [
+    "Home Assistant with HACS installed",
+    "No additional frontend dependencies",
+    "WebSocket API access",
+    "Storage write permissions"
+  ],
+  "development_guidelines": {
+    "code_style": [
+      "Use pure JavaScript (ES6+) - no frameworks",
+      "CSS custom properties for theming",
+      "Responsive design principles",
+      "Clean separation of concerns"
+    ],
+    "api_patterns": [
+      "WebSocket commands for HA communication",
+      "Async/await for all API calls",
+      "Error handling with user feedback",
+      "Configuration persistence"
+    ],
+    "ui_principles": [
+      "Mobile-first responsive design",
+      "Intuitive admin interface",
+      "Real-time state updates",
+      "Accessible design patterns"
+    ]
+  },
+  "testing_approach": [
+    "Manual testing in Home Assistant environment",
+    "Cross-browser compatibility verification",
+    "Mobile device responsive testing",
+    "HACS installation validation"
+  ],
+  "extension_points": [
+    "Add new entity interaction patterns",
+    "Extend theming system with more options",
+    "Add import/export functionality",
+    "Implement dashboard sharing between users",
+    "Add support for custom entity card templates"
+  ],
+  "troubleshooting_common_issues": {
+    "integration_not_found": "Verify HACS installation and repository addition",
+    "admin_panel_not_visible": "Check user has admin privileges",
+    "config_not_saving": "Verify storage permissions and HA logs",
+    "entities_not_updating": "Check WebSocket connection and entity availability"
+  },
+  "future_enhancements": [
+    "Multiple dashboard support per user",
+    "Advanced entity filtering and grouping",
+    "Custom card templates",
+    "Dashboard backup and restore",
+    "Integration with HA scenes and automations",
+    "Voice control integration",
+    "Advanced performance monitoring"
   ]
 }

@@ -1,23 +1,497 @@
-body {
-    background-color: #f0f2f5;
-    font-family: Arial, sans-serif;
+/* Root CSS variables for theming */
+:root {
+    --primary-color: #03a9f4;
+    --accent-color: #ff9800;
+    --background-color: #f0f2f5;
+    --card-background: #ffffff;
+    --text-color: #333333;
+    --font-family: Arial, sans-serif;
+    --border-radius: 8px;
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+    --grid-columns: 3;
+    --card-gap: 16px;
+    --room-title-size: 24px;
+}
+
+/* Reset and base styles */
+* {
     margin: 0;
     padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    color: #333;
+    box-sizing: border-box;
 }
 
-.container {
+body {
+    font-family: var(--font-family);
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+#app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header styles */
+.dashboard-header {
+    background: var(--card-background);
+    padding: 1rem 2rem;
+    box-shadow: var(--shadow);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.dashboard-title {
+    color: var(--primary-color);
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+.header-controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.admin-button,
+.refresh-button {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.admin-button:hover,
+.refresh-button:hover {
+    background: var(--accent-color);
+    transform: translateY(-2px);
+}
+
+.refresh-button {
+    padding: 0.5rem;
+    min-width: 40px;
+}
+
+/* Main view styles */
+.view-container {
+    flex: 1;
+    padding: 2rem;
+}
+
+.rooms-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-columns), 1fr);
+    gap: var(--card-gap);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Room card styles */
+.room-card {
+    background: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 1.5rem;
+    transition: var(--transition);
+    cursor: pointer;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+}
+
+.room-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.room-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--background-color);
+}
+
+.room-icon {
+    font-size: 2rem;
+    color: var(--primary-color);
+}
+
+.room-name {
+    font-size: var(--room-title-size);
+    font-weight: bold;
+    color: var(--text-color);
+    margin: 0;
+}
+
+.room-entities {
+    flex: 1;
+    display: grid;
+    gap: 0.75rem;
+}
+
+/* Entity card styles */
+.entity-card {
+    background: var(--background-color);
+    border-radius: calc(var(--border-radius) / 2);
+    padding: 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.entity-card:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+.entity-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.entity-name {
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.entity-state {
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+.entity-type {
+    background: var(--accent-color);
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    align-self: flex-start;
+}
+
+/* Admin view styles */
+.admin-view {
+    background: white;
+    border-radius: var(--border-radius);
+    margin: 1rem;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.admin-tabs {
+    display: flex;
+    background: var(--background-color);
+    border-bottom: 1px solid #ddd;
+}
+
+.tab-button {
+    flex: 1;
+    padding: 1rem;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    transition: var(--transition);
+    font-weight: 500;
+}
+
+.tab-button.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+.tab-button:hover:not(.active) {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.tab-content {
+    display: none;
+    padding: 2rem;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.admin-section {
+    margin-bottom: 2rem;
+}
+
+.admin-section h3 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.form-group {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.form-group label {
+    min-width: 120px;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group select {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    font-size: 0.9rem;
+    flex: 1;
+    min-width: 150px;
+}
+
+.form-group button {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.form-group button:hover {
+    background: var(--accent-color);
+}
+
+.style-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.config-list {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    padding: 1rem;
+}
+
+.config-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background: var(--background-color);
+    border-radius: var(--border-radius);
+}
+
+.config-item:last-child {
+    margin-bottom: 0;
+}
+
+.config-item-info {
+    flex: 1;
+}
+
+.config-item-name {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.config-item-details {
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+.config-item-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.config-item-actions button {
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 0.3rem 0.6rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: var(--transition);
+}
+
+.config-item-actions button:hover {
+    background: #d32f2f;
+}
+
+.admin-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    padding: 2rem;
+    border-top: 1px solid #ddd;
+    background: var(--background-color);
+}
+
+.save-button,
+.reset-button,
+.apply-button {
+    padding: 0.75rem 2rem;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.save-button,
+.apply-button {
+    background: var(--primary-color);
+    color: white;
+}
+
+.save-button:hover,
+.apply-button:hover {
+    background: var(--accent-color);
+}
+
+.reset-button {
+    background: #f44336;
+    color: white;
+}
+
+.reset-button:hover {
+    background: #d32f2f;
+}
+
+/* Toast notifications */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.toast {
+    background: var(--primary-color);
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 0.5rem;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: var(--transition);
+    max-width: 300px;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.toast.error {
+    background: #f44336;
+}
+
+.toast.success {
+    background: #4caf50;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    :root {
+        --grid-columns: 1;
+        --card-gap: 12px;
+    }
+
+    .dashboard-header {
+        padding: 1rem;
+    }
+
+    .view-container {
+        padding: 1rem;
+    }
+
+    .form-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .form-group label {
+        min-width: auto;
+    }
+
+    .admin-tabs {
+        flex-wrap: wrap;
+    }
+
+    .style-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-actions {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-title {
+        font-size: 1.4rem;
+    }
+
+    .room-name {
+        font-size: 1.2rem;
+    }
+
+    .admin-view {
+        margin: 0.5rem;
+    }
+}
+
+/* Utility classes */
+.hidden {
+    display: none !important;
+}
+
+.loading {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.no-rooms {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-color);
+    opacity: 0.7;
+}
+
+.no-rooms h2 {
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+}
+
+.no-entities {
     text-align: center;
     padding: 2rem;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-h1 {
-    color: #03a9f4; /* Home Assistant blue */
+    color: var(--text-color);
+    opacity: 0.7;
+    font-style: italic;
 }

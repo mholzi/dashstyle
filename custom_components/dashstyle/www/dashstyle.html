@@ -7,10 +7,146 @@
     <link rel="stylesheet" href="/api/dashstyle/static/dashstyle.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Welcome to DashStyle!</h1>
-        <p>This is your custom Home Assistant dashboard.</p>
+    <div id="app">
+        <!-- Header with admin toggle -->
+        <header class="dashboard-header">
+            <h1 class="dashboard-title">DashStyle</h1>
+            <div class="header-controls">
+                <button id="admin-toggle" class="admin-button" style="display: none;">
+                    <span class="icon">⚙️</span>
+                    <span class="text">Admin</span>
+                </button>
+                <button id="refresh-button" class="refresh-button">
+                    <span class="icon">🔄</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Dashboard View -->
+        <div id="main-view" class="view-container">
+            <div id="rooms-container" class="rooms-grid">
+                <!-- Rooms will be dynamically generated here -->
+            </div>
+        </div>
+
+        <!-- Admin View -->
+        <div id="admin-view" class="view-container admin-view" style="display: none;">
+            <div class="admin-tabs">
+                <button class="tab-button active" data-tab="rooms">Rooms</button>
+                <button class="tab-button" data-tab="entities">Entities</button>
+                <button class="tab-button" data-tab="styles">Styles</button>
+                <button class="tab-button" data-tab="layout">Layout</button>
+            </div>
+
+            <!-- Rooms Tab -->
+            <div id="rooms-tab" class="tab-content active">
+                <div class="admin-section">
+                    <h3>Room Management</h3>
+                    <div class="form-group">
+                        <input type="text" id="room-name-input" placeholder="Room name">
+                        <input type="text" id="room-icon-input" placeholder="Room icon (e.g., mdi:home)">
+                        <button id="add-room-btn">Add Room</button>
+                    </div>
+                    <div id="rooms-list" class="config-list">
+                        <!-- Rooms list will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Entities Tab -->
+            <div id="entities-tab" class="tab-content">
+                <div class="admin-section">
+                    <h3>Entity Management</h3>
+                    <div class="form-group">
+                        <select id="room-select">
+                            <option value="">Select a room</option>
+                        </select>
+                        <select id="entity-select">
+                            <option value="">Select an entity</option>
+                        </select>
+                        <input type="text" id="entity-type-input" placeholder="Entity type (e.g., hoover, light)">
+                        <button id="add-entity-btn">Add Entity</button>
+                    </div>
+                    <div id="entities-list" class="config-list">
+                        <!-- Entities list will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Styles Tab -->
+            <div id="styles-tab" class="tab-content">
+                <div class="admin-section">
+                    <h3>Style Configuration</h3>
+                    <div class="style-grid">
+                        <div class="form-group">
+                            <label for="primary-color">Primary Color:</label>
+                            <input type="color" id="primary-color">
+                        </div>
+                        <div class="form-group">
+                            <label for="accent-color">Accent Color:</label>
+                            <input type="color" id="accent-color">
+                        </div>
+                        <div class="form-group">
+                            <label for="background-color">Background Color:</label>
+                            <input type="color" id="background-color">
+                        </div>
+                        <div class="form-group">
+                            <label for="card-background">Card Background:</label>
+                            <input type="color" id="card-background">
+                        </div>
+                        <div class="form-group">
+                            <label for="text-color">Text Color:</label>
+                            <input type="color" id="text-color">
+                        </div>
+                        <div class="form-group">
+                            <label for="font-family">Font Family:</label>
+                            <select id="font-family">
+                                <option value="Arial, sans-serif">Arial</option>
+                                <option value="'Helvetica Neue', Helvetica, sans-serif">Helvetica</option>
+                                <option value="'Segoe UI', Tahoma, Geneva, sans-serif">Segoe UI</option>
+                                <option value="'Roboto', sans-serif">Roboto</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="apply-styles-btn" class="apply-button">Apply Styles</button>
+                </div>
+            </div>
+
+            <!-- Layout Tab -->
+            <div id="layout-tab" class="tab-content">
+                <div class="admin-section">
+                    <h3>Layout Configuration</h3>
+                    <div class="form-group">
+                        <label for="layout-columns">Grid Columns:</label>
+                        <input type="number" id="layout-columns" min="1" max="6" value="3">
+                    </div>
+                    <div class="form-group">
+                        <label for="card-gap">Card Gap (px):</label>
+                        <input type="number" id="card-gap" min="0" max="50" value="16">
+                    </div>
+                    <div class="form-group">
+                        <label for="room-title-size">Room Title Size (px):</label>
+                        <input type="number" id="room-title-size" min="16" max="48" value="24">
+                    </div>
+                    <button id="apply-layout-btn" class="apply-button">Apply Layout</button>
+                </div>
+            </div>
+
+            <div class="admin-actions">
+                <button id="save-config-btn" class="save-button">Save Configuration</button>
+                <button id="reset-config-btn" class="reset-button">Reset to Default</button>
+            </div>
+        </div>
     </div>
+
+    <!-- Toast notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Hidden entry ID for JavaScript -->
+    <script>
+        window.DASHSTYLE_ENTRY_ID = "{{ENTRY_ID}}";
+    </script>
+    
     <script src="/api/dashstyle/static/dashstyle.js"></script>
 </body>
 </html>
